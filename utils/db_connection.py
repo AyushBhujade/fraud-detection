@@ -3,7 +3,7 @@ from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 import pandas as pd
 from src.logger import logging
-uri = "mongodb+srv://ayushbhujade2005:ayush2005@cluster0.ymnqumu.mongodb.net/?appName=Cluster0"
+
     
 class Mongoclient:
     def __init__(self):
