@@ -41,7 +41,7 @@ class ModelTrainer:
         X_train=self.load_data("./data/preprocessed_data/X_train.csv")
         y_train=self.load_data("./data/preprocessed_data/y_train.csv")
         model=self.train_model(X_train,y_train)
-        self.save_model(model,"models/xgboost_model.pkl") 
+        self.save_model(model,"models/model.pkl") 
         
 if __name__ == "__main__":
     model_trainer=ModelTrainer()

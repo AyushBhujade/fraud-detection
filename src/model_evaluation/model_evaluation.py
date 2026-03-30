@@ -75,10 +75,12 @@ class ModelEvaluation:
             logging.error(f"Error occurred while saving metrics to {path}: {e}")
             raise
 
-    def save_model_info(self,run_id,model_path,file_path:str):
+    def save_model_info(self,run_id,model_path,file_path:str,local_model_path:str=None):
         try:
             os.makedirs(os.path.dirname(file_path), exist_ok=True)
             model_info = {"run_id": run_id, "model_path": model_path}
+            if local_model_path:
+                model_info["local_model_path"] = local_model_path
             with open(file_path,'w') as file:
                 json.dump(model_info,file,indent=4)
             logging.info(f"Model info saved to {file_path} successfully.")
@@ -93,7 +95,13 @@ class ModelEvaluation:
             y_test=pd.read_csv("./data/preprocessed_data/y_test.csv")
             eval_metric=self.evaluate_model(model,X_test,y_test)
             self.save_metric(eval_metric,"report/evaluation_metrics.json")
-            self.save_model_info(mlflow.active_run().info.run_id,"models/xgboost_model.pkl","report/model_info.json")
+            # MLflow logs the model under the artifact path "model"
+            self.save_model_info(
+                mlflow.active_run().info.run_id,
+                "model",
+                "report/model_info.json",
+                local_model_path="models/xgboost_model.pkl",
+            )
             for metric_name,metric_value in eval_metric.items():
                 mlflow.log_metric(metric_name,metric_value)
             
