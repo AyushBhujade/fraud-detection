@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FraudGuard AI - Fraud Detection System</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="../static/index.css">
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="navbar">
+<div class="container inner">
+  <a href="#home" class="logo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    <span class="gradient-text">FraudGuard AI</span>
+  </a>
+  <div class="nav-links" id="navLinks">
+    <a href="#home">Home</a><a href="#features">Features</a><a href="#upload">Upload</a><a href="#about">About</a>
+    <a href="#upload" class="btn btn-primary" style="padding:8px 20px;font-size:.85rem">Get Started</a>
+  </div>
+  <button class="hamburger" id="hamburger">&#9776;</button>
+</div>
+</nav>
+
+<!-- HERO -->
+<section id="home">
+<div class="bg-orb a"></div><div class="bg-orb b"></div>
+<div class="container">
+  <div class="glass hero-badge">⚡ Powered by Machine Learning</div>
+  <h1>AI-Powered <span class="gradient-text">Fraud Detection</span> System</h1>
+  <p>Upload transaction data and detect fraud instantly using machine learning. Protect your business with real-time, batch-powered predictions.</p>
+  <div class="hero-buttons">
+    <a href="#upload" class="btn btn-primary">Upload CSV ↓</a>
+    <a href="#features" class="btn btn-glass">Explore Features</a>
+  </div>
+</div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+<div class="container">
+  <div class="section-title"><h2>Why Choose <span class="gradient-text">FraudGuard</span>?</h2><p>Advanced ML-powered fraud detection at your fingertips.</p></div>
+  <div class="features-grid">
+    <div class="feature-card glass"><div class="feature-icon">📂</div><h3>Batch CSV Upload</h3><p>Upload thousands of transactions at once for efficient batch processing.</p></div>
+    <div class="feature-card glass"><div class="feature-icon">⚡</div><h3>Real-time Prediction</h3><p>Get instant fraud predictions powered by trained ML models.</p></div>
+    <div class="feature-card glass"><div class="feature-icon">📊</div><h3>Fraud Analytics</h3><p>Visualize fraud patterns with interactive charts and summaries.</p></div>
+    <div class="feature-card glass"><div class="feature-icon">🔒</div><h3>Secure API</h3><p>Enterprise-grade security with scalable FastAPI backend.</p></div>
+  </div>
+</div>
+</section>
+
+<!-- UPLOAD -->
+<section id="upload">
+<div class="container">
+  <div class="section-title"><h2>Upload & <span class="gradient-text">Analyze</span></h2><p>Drop your CSV file below and let our ML model detect fraudulent transactions.</p></div>
+  <div class="upload-box">
+    <div class="drop-zone glass" id="dropZone">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <p style="font-weight:500">Drag & drop your CSV file here</p>
+      <p style="font-size:.85rem;color:var(--text-muted)">or click to browse</p>
+    </div>
+    <input type="file" id="fileInput" accept=".csv" hidden>
+    <div id="fileInfo" class="file-info glass" style="display:none">
+      <div class="name"><span>📄</span><span id="fileName"></span><span id="fileSize" style="color:var(--text-muted);font-size:.8rem"></span></div>
+      <button class="remove" id="removeFile">✕</button>
+    </div>
+    <button class="btn btn-primary" id="predictBtn" disabled>✓ Predict Fraud</button>
+  </div>
+</div>
+</section>
+
+<!-- RESULTS -->
+<section id="results">
+<div class="container">
+  <div class="section-title"><h2>Prediction <span class="gradient-text">Results</span></h2></div>
+  <div class="stats-grid">
+    <div class="stat-card glass safe"><div class="value" id="totalCount">0</div><div class="label">Total Transactions</div></div>
+    <div class="stat-card glass fraud"><div class="value" id="fraudCount">0</div><div class="label">Fraud Detected</div></div>
+    <div class="stat-card glass rate"><div class="value" id="fraudRate">0%</div><div class="label">Fraud Rate</div></div>
+  </div>
+  <div class="table-wrap glass" id="tableWrap"></div>
+  <div class="download-row"><button class="btn btn-glass" id="downloadBtn">⬇ Download CSV</button></div>
+</div>
+</section>
+
+<!-- CHARTS -->
+<section id="charts">
+<div class="container">
+  <div class="section-title"><h2>Fraud <span class="gradient-text">Analytics</span></h2></div>
+  <div class="charts-grid">
+    <div class="chart-card glass"><h3>Distribution</h3><canvas id="doughnutChart"></canvas></div>
+    <div class="chart-card glass"><h3>Comparison</h3><canvas id="barChart"></canvas></div>
+  </div>
+</div>
+</section>
+
+<!-- FOOTER -->
+<footer id="about">
+  <div class="container">
+    <p><strong class="gradient-text">FraudGuard AI</strong> — ML-Powered Fraud Detection</p>
+    <p style="margin-top:8px">© 2025 FraudGuard AI. Built with ❤️</p>
+  </div>
+</footer>
+
+<script src="../static/script.js"></script>
+</body>
+</html>

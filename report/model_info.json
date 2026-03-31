@@ -1,0 +1,5 @@
+{
+    "run_id": "ce4ec1e5d24d42608329a2ac996b08b6",
+    "model_path": "model",
+    "local_model_path": "models/xgboost_model.pkl"
+}

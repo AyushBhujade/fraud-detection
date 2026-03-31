@@ -6,6 +6,13 @@ xgboost
 dagshub
 mlflow
 dvc
+dvc[s3]
+awscli
+boto3
 imblearn
 python-dotenv
+fastapi[standard]
+uvicorn
+python-multipart
+jinja2
 -e .
