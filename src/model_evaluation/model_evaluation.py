@@ -95,10 +95,10 @@ class ModelEvaluation:
             y_test=pd.read_csv("./data/preprocessed_data/y_test.csv")
             eval_metric=self.evaluate_model(model,X_test,y_test)
             self.save_metric(eval_metric,"report/evaluation_metrics.json")
-            # MLflow logs the model under the artifact path "model"
+            # Keep model artifact path aligned with model_info.json
             self.save_model_info(
                 mlflow.active_run().info.run_id,
-                "model",
+                "registry_model",
                 "report/model_info.json",
                 local_model_path="models/xgboost_model.pkl",
             )
@@ -109,7 +109,30 @@ class ModelEvaluation:
                 params=model.get_params()
                 for name, value in params.items():
                     mlflow.log_param(name, value)
-            mlflow.sklearn.log_model(model,"model")
+            # Log + register in one call so the artifact is fully uploaded
+            # before registration (important for remote stores like DagsHub).
+            model_name = "XGBoost"
+            model_info = mlflow.sklearn.log_model(
+                model,
+                "registry_model",
+                registered_model_name=model_name,
+            )
+
+            # Transition the newly registered version to Staging
+            client = mlflow.tracking.MlflowClient()
+            version = getattr(model_info, "registered_model_version", None)
+            if version is None:
+                # Fallback to latest if the info object doesn't include version
+                latest = client.get_latest_versions(model_name)
+                if latest:
+                    version = latest[0].version
+            if version is not None:
+                client.transition_model_version_stage(
+                    name=model_name,
+                    version=version,
+                    stage="Staging",
+                    archive_existing_versions=False,
+                )
             
             mlflow.log_artifact("report/evaluation_metrics.json",artifact_path="evaluation_metrics")    
 
