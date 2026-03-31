@@ -38,6 +38,7 @@ def home():
 async def predict_batch(file: UploadFile = File(...)):
     contents = await file.read()
     df = pd.read_csv(io.StringIO(contents.decode("utf-8")))
+    df.dropna(inplace=True)
     print("Rows received:", len(df))
     predictions = model.predict(df)  # add column filtering if needed
     df["prediction"] = predictions

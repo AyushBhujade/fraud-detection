@@ -100,7 +100,7 @@ class ModelEvaluation:
                 mlflow.active_run().info.run_id,
                 "registry_model",
                 "report/model_info.json",
-                local_model_path="models/xgboost_model.pkl",
+                local_model_path="models/model.pkl",
             )
             for metric_name,metric_value in eval_metric.items():
                 mlflow.log_metric(metric_name,metric_value)
@@ -109,30 +109,8 @@ class ModelEvaluation:
                 params=model.get_params()
                 for name, value in params.items():
                     mlflow.log_param(name, value)
-            # Log + register in one call so the artifact is fully uploaded
-            # before registration (important for remote stores like DagsHub).
-            model_name = "XGBoost"
-            model_info = mlflow.sklearn.log_model(
-                model,
-                "registry_model",
-                registered_model_name=model_name,
-            )
-
-            # Transition the newly registered version to Staging
-            client = mlflow.tracking.MlflowClient()
-            version = getattr(model_info, "registered_model_version", None)
-            if version is None:
-                # Fallback to latest if the info object doesn't include version
-                latest = client.get_latest_versions(model_name)
-                if latest:
-                    version = latest[0].version
-            if version is not None:
-                client.transition_model_version_stage(
-                    name=model_name,
-                    version=version,
-                    stage="Staging",
-                    archive_existing_versions=False,
-                )
+            # Only log the model here; registration is handled in model_registry.py
+            mlflow.sklearn.log_model(model, "registry_model")
             
             mlflow.log_artifact("report/evaluation_metrics.json",artifact_path="evaluation_metrics")    
 

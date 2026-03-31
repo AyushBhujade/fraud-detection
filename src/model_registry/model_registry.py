@@ -41,49 +41,47 @@ class ModelRegistry:
     def register_model(self,model_name: str, model_info: dict):
         """Register the model to the MLflow Model Registry."""
         try:
-            run_id = model_info["run_id"]
-            primary_path = model_info["model_path"]
-            # Try primary path first; fall back to legacy "model" if needed
-            candidate_paths = [primary_path]
-            if primary_path != "model":
-                candidate_paths.append("model")
+            # Log + register locally to avoid remote artifact sync delays.
+            local_model_path = model_info.get("local_model_path")
+            if not local_model_path:
+                raise ValueError("local_model_path is missing in model_info.json")
 
-            model_version = None
-            last_error = None
-            for artifact_path in candidate_paths:
-                model_uri = f"runs:/{run_id}/{artifact_path}"
-                try:
-                    model_version = mlflow.register_model(model_uri, model_name)
-                    logging.info(f"Registered model from artifact path '{artifact_path}'.")
-                    break
-                except Exception as e:
-                    last_error = e
-                    if "Unable to find a logged_model with artifact_path" not in str(e):
-                        raise
+            with mlflow.start_run(run_name="Model Registry"):
+                with open(local_model_path, "rb") as f:
+                    model = pickle.load(f)
+                model_info_obj = mlflow.sklearn.log_model(
+                    model,
+                    "registry_model",
+                    registered_model_name=model_name,
+                )
+                model_version = getattr(model_info_obj, "registered_model_version", None)
+                if model_version is None:
+                    client = mlflow.tracking.MlflowClient()
+                    latest = client.get_latest_versions(model_name)
+                    if latest:
+                        model_version = latest[0].version
 
-            if model_version is None:
-                raise last_error
-            
             # Transition the model to "Staging" stage
             client = mlflow.tracking.MlflowClient()
             client.transition_model_version_stage(
                 name=model_name,
-                version=model_version.version,
+                version=model_version,
                 stage="Staging",
-                archive_existing_versions=False   # 🔥 ADD THIS
+                archive_existing_versions=False
             )
             
-            logging.debug(f'Model {model_name} version {model_version.version} registered and transitioned to Staging.')
+            logging.debug(f"Model {model_name} version {model_version} registered and transitioned to Staging.")
         except Exception as e:
             logging.error('Error during model registration: %s', e)
             raise
+
 def main():
     try:
         registry=ModelRegistry()
         model_info_path = 'report/model_info.json'
         model_info = registry.load_model_info(model_info_path)
         
-        model_name = "XGBoost"
+        model_name = "new_XGBoost"
         registry.register_model(model_name, model_info)
     except Exception as e:
         logging.error('Failed to complete the model registration process: %s', e)
