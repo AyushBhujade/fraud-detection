@@ -1,16 +1,21 @@
+import time
+import mlflow
+import dagshub
+import os
+import io
+import pandas as pd
+from fastapi.responses import Response
 from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from prometheus_client import Counter, generate_latest, CONTENT_TYPE_LATEST, CollectorRegistry
+from prometheus_client import Counter, Histogram
+
 from src.logger import logging
 from utils.config_utils.env_loader import load_env
-import mlflow
-import dagshub
-import os
-import pandas as pd
-import pickle
-import io
-import os
+
+
 
 app = FastAPI()
 
@@ -21,6 +26,29 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+REQUEST_COUNT = Counter(
+    "http_requests_total",
+    "Total HTTP Requests",
+    ["method", "endpoint"]
+)
+
+REQUEST_LATENCY = Histogram(
+    "http_request_duration_seconds",
+    "Request latency"
+)
+
+PREDICTION_COUNT = Counter(
+    "model_predictions_total",
+    "Total predictions"
+)
+
+FRAUD_COUNT = Counter(
+    "fraud_predictions_total",
+    "Fraud predictions"
+)
+
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 repo_name = load_env("REPO_NAME")
@@ -78,6 +106,8 @@ def home():
 
 @app.post("/predict-batch")
 async def predict_batch(file: UploadFile = File(...)):
+    start_time = time.time()
+    REQUEST_COUNT.labels(method="POST", endpoint="/predict").inc()
     if model is None:
         return {"error": "Model not found in MLflow registry. Check MLFLOW_TRACKING_URI / MLFLOW_REGISTRY_URI."}
     contents = await file.read()
@@ -85,5 +115,16 @@ async def predict_batch(file: UploadFile = File(...)):
     df.dropna(inplace=True)
     print("Rows received:", len(df))
     predictions = model.predict(df)  # add column filtering if needed
+    
+    PREDICTION_COUNT.inc()
+    
+    if predictions == 1:
+        FRAUD_COUNT.inc()
+    
+    REQUEST_LATENCY.observe(time.time() - start_time)
     df["prediction"] = predictions
     return df.to_dict(orient="records")
+
+@app.get("/metrics")
+def metrics():
+    return Response(generate_latest(), media_type="text/plain")
