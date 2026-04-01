@@ -30,7 +30,7 @@ jobs:
         pip install -r requirements.txt
     - name: run pipeline
       env:
-        DAGSHUB_AUTH_TOKEN: ${{ secrets.DAGSHUB_ACCESS_TOKEN }}
+        DAGSHUB_AUTH_TOKEN: ${{ secrets.DAGSHUB_AUTH_TOKEN }}
         MONGO_DB_URI: ${{ secrets.MONGO_DB_URI }}
         
       run: |
