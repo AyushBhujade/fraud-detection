@@ -12,24 +12,19 @@ class ModelRegistry:
         logging.info("Model registry initialized.")
         # Ensure .env is loaded so registry uses the same tracking as evaluation
         dagshub_token=os.getenv("DAGSHUB_AUTH_TOKEN")
-        
-        if dagshub_token:
-            os.environ["DAGSHUB_TOKEN"] = dagshub_token
-            logging.info("DagsHub authentication token set from environment variable.")
-        else:
-            raise ValueError("DAGSHUB_AUTH_TOKEN not found in environment variables. Please set it to enable DagsHub tracking.")    
         self.repo_name="fraud-detection"
         self.repo_owner="ayushbhujade2005"
-
-        if self.repo_owner and self.repo_name:
-            try:
-                dagshub.init(repo_owner=self.repo_owner, repo_name=self.repo_name, mlflow=True)
-                mlflow.set_tracking_uri(f"https://dagshub.com/{self.repo_owner}/{self.repo_name}.mlflow")
-                logging.info("DagsHub tracking enabled for model registry.")
-            except Exception as e:
-                logging.warning(f"Could not initialize DagsHub tracking for model registry: {e}. Falling back to local MLflow tracking.")
+        if dagshub_token:
+            os.environ["MLFLOW_TRACKING_USERNAME"] = self.repo_owner
+            os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
+            logging.info("DagsHub authentication configured via MLflow.")
         else:
-            logging.info("DagsHub repo info not set. Using local MLflow tracking for model registry.")
+            raise ValueError("DAGSHUB_AUTH_TOKEN not found.")
+        
+        # ✅ Set tracking URI directly
+        mlflow.set_tracking_uri(f"https://dagshub.com/{self.repo_owner}/{self.repo_name}.mlflow") 
+        
+        
     
     def load_model_info(self,file_path: str) -> dict:
         """Load the model info from a JSON file."""
