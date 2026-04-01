@@ -8,7 +8,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 data
-
+models/
 # C extensions
 *.so
 report/
