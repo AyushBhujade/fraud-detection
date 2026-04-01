@@ -11,6 +11,8 @@ data
 
 # C extensions
 *.so
+report/
+logs/
 local_s3/
 # Distribution / packaging
 .Python
