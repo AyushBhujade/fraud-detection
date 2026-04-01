@@ -8,7 +8,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 data
-
+model.pkl
 # C extensions
 *.so
 report/
