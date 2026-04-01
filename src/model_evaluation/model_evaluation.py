@@ -13,11 +13,10 @@ from dagshub.common.errors import DagsHubRepoNotFoundError
 class ModelEvaluation:
     def __init__(self):
         logging.info("Model evaluation initialized.")
-        dagshub_token=load_env("DAGSHUB_AUTH_TOKEN")
+        dagshub_token=os.getenv("DAGSHUB_AUTH_TOKEN")
         
         if dagshub_token:
-            os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
-            os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
+            os.environ["DAGSHUB_TOKEN"] = dagshub_token
             logging.info("DagsHub authentication token set from environment variable.")
         else:
             raise ValueError("DAGSHUB_AUTH_TOKEN not found in environment variables. Please set it to enable DagsHub tracking.")    
