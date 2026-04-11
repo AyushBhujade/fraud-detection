@@ -35,3 +35,27 @@ jobs:
         
       run: |
         dvc repro
+
+    - name: login to AWS ECR 
+      if: success()
+      run: |
+         aws config set aws_access_key_id ${{secrets.AWS_ACCESS_KEY_ID}}  
+         aws config set aws_secret_access_key ${{secrets.AWS_SECRET_ACCESS_KEY}}
+         aws config set region ${{secrets.AWS_REGION}}\
+         aws ecr get-login-password --region ${{secrets.AWS_REGION}} | docker login --username AWS --password-stdin ${{secrets.AWS_ACCOUNT_ID}}.dkr.ecr.${{secrets.AWS_REGION}}.amazonaws.com
+
+    - name: Build Docker image
+      run: |
+        docker build -t fraud-detection:latest .  
+
+    - name: Tag Docker image
+      run: |
+        docker tag fraud-detection:latest \${{secrets.AWS_ACCOUNT_ID}}.dkr.ecr.${{secrets.AWS_REGION}}.amazonaws.com/fraud-detection:latest 
+
+    - name: check docker authentication
+      run: docker info
+
+    - name: push docker image to ECR
+      run:
+        docker push ${{secrets.AWS_ACCOUNT_ID}}.dkr.ecr.${{secrets.AWS_REGION}}.amazonaws.com/fraud-detection:latest
+      
